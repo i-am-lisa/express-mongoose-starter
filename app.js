@@ -6,16 +6,16 @@ var hbs = require('hbs');
 const morgan = require('morgan');
 const PORT = process.env.PORT
 
-//ensure database is connected
+// set up body-parser (library for grabbing information from the client and send it to us)
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
+//ensure database is connected, see db.config.js
 // We connect to our local database here called `todos`
-mongoose.connect('mongodb://localhost/todos', { useNewUrlParser: true,
-useUnifiedTopology: true,})
-    .then((self) => {
-        console.log('Yayyy Database is connected');
-    })
-    .catch(() => {
-        console.log('Something went wrong with db connection!');
-    })
+// connect with db.config.js
+require('./config/db.config')
 
 
 // Register your template engine
@@ -42,10 +42,15 @@ app.use(morgan('dev'));
 //hbs.registerPartials(__dirname + '/views/partials');
 
 
-// Routes here
-app.get('/', (req, res) => {
-    res.render('landing.hbs')
+// Routes in routes folder and require it here
+const TodoRoutes = require('./routes/Todo.routes.js')
+app.use('/', TodoRoutes)
+
+// 404 Page with middleware after creating the routes
+app.use((req, res, next) => {
+    res.status(404).send('PAGE NOT FOUND')
 })
+
 
 
 //Start the server to begin listening on a port
